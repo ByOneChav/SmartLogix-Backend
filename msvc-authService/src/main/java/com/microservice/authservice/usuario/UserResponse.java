@@ -1,5 +1,8 @@
 package com.microservice.authservice.usuario;
 
-public class UserResponse {
-
+public record UserResponse(
+        String name,
+        String email
+) {
 }
+

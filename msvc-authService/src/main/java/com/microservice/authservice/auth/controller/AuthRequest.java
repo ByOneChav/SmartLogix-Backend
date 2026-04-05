@@ -1,6 +1,6 @@
 package com.microservice.authservice.auth.controller;
 
-public record LoginRequest(
+public record AuthRequest(
     String email,
     String password
 ) {

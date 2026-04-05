@@ -21,21 +21,24 @@ public class AuthController {
     private final AuthService service;
 
     @PostMapping("/register")
-    public ResponseEntity<TokenResponse> register(@RequestBody final RegisterRequest request){
-        final TokenResponse token = service.register(request);
-        return ResponseEntity.ok(token);
+    public ResponseEntity<TokenResponse> register(@RequestBody RegisterRequest request) {
+        final TokenResponse response = service.register(request);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenResponse> authenticate(@RequestBody final LoginRequest request){
-        final TokenResponse token = service.login(request);
-        return ResponseEntity.ok(token);
+    public ResponseEntity<TokenResponse> authenticate(@RequestBody AuthRequest request) {
+        final TokenResponse response = service.authenticate(request);
+        return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/refresh")
-    public TokenResponse refreshToken(@RequestHeader(HttpHeaders.AUTHORIZATION) final String authHeader){
-        return service.refreshToken(authHeader);
+    @PostMapping("/refresh-token")
+    public TokenResponse refreshToken(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) final String authentication
+    ) {
+        return service.refreshToken(authentication);
     }
-   
+
 
 }
+

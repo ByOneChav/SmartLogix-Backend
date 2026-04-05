@@ -7,7 +7,7 @@ application:
     jwt:
       secret-key: McvbIKwPaVjhmBwFUdHDXzvfWeAZgaJ8XJr6cBsvNkPI9VUvAWw7GzFMV6ZhHsI
       expiration: 86400000
-      refrech-token:
+      refresh-token:
         expiration: 604800000
 
 spring:
@@ -20,7 +20,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect

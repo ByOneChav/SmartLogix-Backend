@@ -1,38 +1,33 @@
 package com.microservice.authservice.usuario;
 
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.util.List;
 
-import ch.qos.logback.core.subst.Token;
-import jakarta.persistence.Column;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.microservice.authservice.auth.repository.Token;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
 @Table(name = "users")
 public class User {
 
-    @Id
-    @GeneratedValue
-    private Long id;
+  @Id
+  @GeneratedValue
+  private Integer id;
 
-    private String name;
+  @Column(nullable = false)
+  private String name;
 
-    @Column(unique = true)
-    private String email;
-    private String password;
+  @Column(nullable = false, unique = true)
+  private String email;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<Token> tokens;
+  @Column(nullable = false)
+  private String password;
 
-
+  @OneToMany(mappedBy = "user")
+  private List<Token> tokens;
 }

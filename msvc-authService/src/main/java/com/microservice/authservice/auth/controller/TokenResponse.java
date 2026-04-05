@@ -8,4 +8,4 @@ public record TokenResponse(
     @JsonProperty("refresh_token")
     String refreshToken
 ) {
-} 
+}
