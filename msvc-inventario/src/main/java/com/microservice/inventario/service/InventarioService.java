@@ -24,7 +24,7 @@ public class InventarioService {
     private PedidoClient pedidoClient;
 
     /**
-     * Obtener todos los cursos
+     * Obtener todos los inventarios
      */
     public List<Inventario> findAll() {
         return inventarioRepository.findAll();
@@ -39,22 +39,22 @@ public class InventarioService {
     }
 
     /**
-     * Guardar curso
+     * Guardar inventario
      */
     public void save(Inventario inventario) {
         inventarioRepository.save(inventario);
     }
 
     /**
-     * Obtener curso + estudiantes asociados (microservicio)
+     * Obtener inventario + pedidos asociados (microservicio)
      */
     public PedidoByInventarioResponse findPedidosByInventarioId(Long inventarioId) {
 
-        // 1. Buscar curso en BD
+        // 1. Buscar inventario en BD
         Inventario inventario = inventarioRepository.findById(inventarioId)
                 .orElseThrow(() -> new RuntimeException("Inventario no encontrado"));
 
-        // 2. Consumir microservicio student
+        // 2. Consumir microservicio pedido
         List<PedidoDTO> pedidos = pedidoClient.findAllProductoByInventario(inventarioId);
 
         // 3. Armar respuesta
