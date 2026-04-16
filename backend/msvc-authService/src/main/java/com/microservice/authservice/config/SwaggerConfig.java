@@ -38,7 +38,7 @@ public class SwaggerConfig {
                 // 📝 Información de la API
                 .info(new Info()
                         .title("Auth Service - SMARTLOGIX")
-                        .version("1.0")
+                        .version("5.0")
                         .description("""
                                 Servicio encargado de:
                                 - Registro de usuarios

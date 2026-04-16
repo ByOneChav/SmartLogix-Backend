@@ -13,7 +13,7 @@ import io.swagger.v3.oas.models.servers.Server;
 public class SwaggerConfig {
 
     @Bean
-    public OpenAPI customOpenAPI(){
+    public OpenAPI customOpenAPI() {
 
         return new OpenAPI()
 
@@ -21,14 +21,15 @@ public class SwaggerConfig {
                 .addServersItem(new Server().url("http://localhost:8080"))
 
                 .info(
-                    new Info()
-                        .title("Microservicio de Gestión de Pedidos - SMARTLOGIX")
-                        .version("v5.6")
-                        .description(
-                            "Este microservicio forma parte de la arquitectura de SMARTLOGIX y es responsable de la gestión completa de pedidos. " +
-                            "Permite registrar, consultar, actualizar y eliminar pedidos dentro del sistema.\n\n"
-
-                        )
-                );
+                        new Info()
+                                .title("Pedido Service - SMARTLOGIX")
+                                .version("v5.6")
+                                .description("""
+                                        Servicio encargado de:
+                                        - Registro de pedido
+                                        - Actualizar pedido
+                                        - Buscar pedido
+                                        - Eliminar pedido
+                                        """));
     }
 }

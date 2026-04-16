@@ -23,21 +23,16 @@ public class SwaggerConfig {
 
                 // 📌 Información del microservicio
                 .info(
-                    new Info()
-                        .title("Microservicio de Gestión de Inventario - SMARTLOGIX")
-                        .version("v1.0")
-                        .description(
-                            "Este microservicio forma parte de la arquitectura de SMARTLOGIX y se encarga de la gestión del inventario.\n\n" +
-
-                            "📦 Funcionalidades principales:\n" +
-                            "- Registrar productos en inventario\n" +
-                            "- Consultar productos disponibles\n" +
-                            "- Actualizar stock y ubicación\n" +
-                            "- Eliminar productos\n" +
-                            "- Integración con microservicio de pedidos\n\n" +
-
-                            "🔗 Este servicio se comunica con el microservicio de PEDIDOS mediante FeignClient para obtener los pedidos asociados a un inventario."
-                        )
+                        new Info()
+                                .title("Inventario Service - SMARTLOGIX")
+                                .version("v5.6")
+                                .description("""
+                                        Servicio encargado de:
+                                        - Registro de inventario
+                                        - Actualizar inventario
+                                        - Buscar inventario
+                                        - Eliminar inventario
+                                        """)
                 );
     }
 }
