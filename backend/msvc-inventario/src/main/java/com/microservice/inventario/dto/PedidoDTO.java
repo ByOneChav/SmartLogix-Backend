@@ -11,9 +11,9 @@ import lombok.*;
 @NoArgsConstructor
 public class PedidoDTO {
 
-    private String name;
     private String descripcion;
     private Integer cantidad;
     private Integer precio;
+
     private Long inventarioId;
 }

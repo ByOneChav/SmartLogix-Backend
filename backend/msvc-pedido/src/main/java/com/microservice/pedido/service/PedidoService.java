@@ -2,46 +2,58 @@ package com.microservice.pedido.service;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.microservice.pedido.model.Pedido;
 import com.microservice.pedido.repository.PedidoRepository;
 
+import jakarta.transaction.Transactional;
+
 /**
- * Servicio principal que contiene toda la lógica de negocio
- * Ya NO usamos interfaz ni implementación separada
+ * Servicio que contiene la lógica de negocio
  */
 @Service
+@Transactional
 public class PedidoService {
 
-    // Inyección del repositorio para acceder a la BD
-    @Autowired
-    private PedidoRepository pedidoRepository;
+    private final PedidoRepository pedidoRepository;
+
+    // Inyección por constructor (mejor práctica)
+    public PedidoService(PedidoRepository pedidoRepository) {
+        this.pedidoRepository = pedidoRepository;
+    }
 
     /**
      * Obtener todos los pedidos
      */
     public List<Pedido> findAll() {
-        return (List<Pedido>) pedidoRepository.findAll();
+        return pedidoRepository.findAll();
     }
 
     /**
      * Buscar pedido por ID
      */
     public Pedido findById(Long id) {
-        return pedidoRepository.findById(id).orElseThrow();
+        return pedidoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
     }
 
     /**
-     * Guardar un pedido
+     * Guardar pedido
      */
-    public void save(Pedido pedido) {
-        pedidoRepository.save(pedido);
+    public Pedido save(Pedido pedido) {
+        return pedidoRepository.save(pedido);
     }
 
     /**
-     * Buscar pedidos por inventarioId
+     * Eliminar pedido
+     */
+    public void delete(Long id) {
+        pedidoRepository.deleteById(id);
+    }
+
+    /**
+     * Buscar por inventarioId
      */
     public List<Pedido> findByInventarioId(Long inventarioId) {
         return pedidoRepository.findAllByInventarioId(inventarioId);

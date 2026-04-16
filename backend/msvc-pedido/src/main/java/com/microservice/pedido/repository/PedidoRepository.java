@@ -1,18 +1,18 @@
 package com.microservice.pedido.repository;
 
-import org.springframework.data.repository.CrudRepository;
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.microservice.pedido.model.Pedido;
 
-import java.util.List;
-
 /**
- * Repositorio para acceso a datos
+ * Repositorio que conecta con la BD
  */
 @Repository
-public interface PedidoRepository extends CrudRepository<Pedido, Long> {
+public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
-    // Método personalizado (Spring lo genera automáticamente)
+    // Query derivada para buscar por inventarioId
     List<Pedido> findAllByInventarioId(Long inventarioId);
 }

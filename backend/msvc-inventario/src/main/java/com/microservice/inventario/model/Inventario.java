@@ -1,28 +1,43 @@
 package com.microservice.inventario.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.*;
 import lombok.*;
 
 /**
- * Entidad que representa la tabla courses
+ * Entidad que representa la tabla inventario
  */
 @Entity
-@Getter
-@Setter
+@Table(name = "inventario")
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "inventario")
 public class Inventario {
 
+    // ID autogenerado
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "ID del inventario", example = "1")
     private Long id;
 
+    // Nombre del producto
+    @Column(nullable = false)
+    @Schema(description = "Nombre del producto", example = "Laptop Lenovo")
     private String nombreProducto;
+
+    // Ubicación física
+    @Column(nullable = false)
+    @Schema(description = "Ubicación del producto", example = "Bodega A")
     private String ubicacion;
+
+    // Stock disponible
+    @Column(nullable = false)
+    @Schema(description = "Cantidad disponible", example = "50")
+    private Integer stock;
+
+    // Precio unitario
+    @Column(nullable = false)
+    @Schema(description = "Precio del producto", example = "500000")
+    private Integer precio;
 }

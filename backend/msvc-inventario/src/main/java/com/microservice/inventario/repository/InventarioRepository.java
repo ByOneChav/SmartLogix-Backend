@@ -6,7 +6,8 @@ import org.springframework.stereotype.Repository;
 import com.microservice.inventario.model.Inventario;
 
 /**
- * Repositorio para acceso a base de datos
+ * Repositorio JPA para Inventario
+ * Permite acceso a la base de datos
  */
 @Repository
 public interface InventarioRepository extends JpaRepository<Inventario, Long> {

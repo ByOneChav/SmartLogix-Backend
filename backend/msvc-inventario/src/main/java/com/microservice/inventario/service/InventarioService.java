@@ -1,6 +1,5 @@
 package com.microservice.inventario.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.microservice.inventario.client.PedidoClient;
@@ -12,52 +11,60 @@ import com.microservice.inventario.repository.InventarioRepository;
 import java.util.List;
 
 /**
- * Servicio principal con toda la lógica de negocio
+ * Servicio con la lógica de negocio
  */
 @Service
 public class InventarioService {
 
-    @Autowired
-    private InventarioRepository inventarioRepository;
+    private final InventarioRepository inventarioRepository;
+    private final PedidoClient pedidoClient;
 
-    @Autowired
-    private PedidoClient pedidoClient;
+    // Inyección por constructor (mejor práctica)
+    public InventarioService(InventarioRepository inventarioRepository, PedidoClient pedidoClient) {
+        this.inventarioRepository = inventarioRepository;
+        this.pedidoClient = pedidoClient;
+    }
 
-    /**
-     * Obtener todos los inventarios
-     */
+    // Obtener todos los registros
     public List<Inventario> findAll() {
         return inventarioRepository.findAll();
     }
 
-    /**
-     * Buscar curso por ID
-     */
+    // Buscar por ID
     public Inventario findById(Long id) {
         return inventarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Inventario no encontrado"));
     }
 
-    /**
-     * Guardar inventario
-     */
-    public void save(Inventario inventario) {
-        inventarioRepository.save(inventario);
+    // Guardar inventario
+    public Inventario save(Inventario inventario) {
+        return inventarioRepository.save(inventario);
     }
 
-    /**
-     * Obtener inventario + pedidos asociados (microservicio)
-     */
+    // Actualizar inventario
+    public Inventario update(Long id, Inventario inventario) {
+        Inventario existente = findById(id);
+
+        existente.setNombreProducto(inventario.getNombreProducto());
+        existente.setUbicacion(inventario.getUbicacion());
+        existente.setStock(inventario.getStock());
+        existente.setPrecio(inventario.getPrecio());
+
+        return inventarioRepository.save(existente);
+    }
+
+    // Eliminar inventario
+    public void delete(Long id) {
+        inventarioRepository.deleteById(id);
+    }
+
+    // Consumir microservicio pedido
     public PedidoByInventarioResponse findPedidosByInventarioId(Long inventarioId) {
 
-        // 1. Buscar inventario en BD
-        Inventario inventario = inventarioRepository.findById(inventarioId)
-                .orElseThrow(() -> new RuntimeException("Inventario no encontrado"));
+        Inventario inventario = findById(inventarioId);
 
-        // 2. Consumir microservicio pedido
         List<PedidoDTO> pedidos = pedidoClient.findAllProductoByInventario(inventarioId);
 
-        // 3. Armar respuesta
         return PedidoByInventarioResponse.builder()
                 .nombreProducto(inventario.getNombreProducto())
                 .ubicacion(inventario.getUbicacion())

@@ -1,77 +1,51 @@
 package com.microservice.authservice.config;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.context.annotation.*;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.microservice.authservice.auth.repository.Token;
-import com.microservice.authservice.auth.repository.TokenRepository;
-
-import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
-
+/**
+ * Configuración de seguridad del AuthService
+ */
 @Configuration
-@EnableWebSecurity
-@RequiredArgsConstructor
-@EnableMethodSecurity
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthFilter;
-    private final AuthenticationProvider authenticationProvider;
-    private final TokenRepository tokenRepository;
-
+    /**
+     * 🔐 Bean para encriptar contraseñas con BCrypt
+     */
     @Bean
-    public SecurityFilterChain securityFilterChain(final HttpSecurity http) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(req ->
-                        req.requestMatchers("/auth/**")
-                                .permitAll()
-                                .anyRequest()
-                                .authenticated()
-                )
-                .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
-                .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .logout(logout ->
-                        logout.logoutUrl("/auth/logout")
-                                .addLogoutHandler(this::logout)
-                                .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
-                )
-        ;
-
-        return http.build();
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
-    private void logout(
-            final HttpServletRequest request, final HttpServletResponse response,
-            final Authentication authentication
-    ) {
+    /**
+     * 🔒 Configuración de seguridad HTTP
+     */
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return;
-        }
+        http
+            // ❌ Desactiva CSRF (porque usamos API REST con JWT)
+            .csrf(csrf -> csrf.disable())
 
-        final String jwt = authHeader.substring(7);
-        final Token storedToken = tokenRepository.findByToken(jwt)
-                .orElse(null);
-        if (storedToken != null) {
-            storedToken.setIsExpired(true);
-            storedToken.setIsRevoked(true);
-            tokenRepository.save(storedToken);
-            SecurityContextHolder.clearContext();
-        }
+            // 🔐 Configuración de autorizaciones
+            .authorizeHttpRequests(auth -> auth
+
+                // 🟢 ENDPOINTS PÚBLICOS (NO requieren token)
+                .requestMatchers("/api/auth/**").permitAll()
+
+                // 🟢 Swagger (para documentación)
+                .requestMatchers(
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html"
+                ).permitAll()
+
+                // 🔒 Cualquier otro endpoint requiere autenticación
+                .anyRequest().authenticated()
+            );
+
+        return http.build();
     }
 }

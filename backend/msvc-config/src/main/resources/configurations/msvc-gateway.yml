@@ -1,4 +1,4 @@
-eureka: 
+eureka:
   client:
     register-with-eureka: true
 
@@ -8,24 +8,35 @@ server:
 spring:
   application:
     name: msvc-gateway
+
   cloud:
     gateway:
       discovery:
         locator:
           enabled: true
+
       routes:
+
+        # 🔐 AUTH SERVICE (CORREGIDO)
         - id: authService
           uri: http://localhost:8081
           predicates:
-            - Path=/auth/**
+            # 🔥 CAMBIO CLAVE AQUÍ
+            - Path=/api/auth/**
+
+        # 📦 PEDIDO SERVICE (SIN CAMBIOS)
         - id: pedido
           uri: http://localhost:8082
           predicates:
             - Path=/api/pedido/**
+
+        # 📦 INVENTARIO SERVICE (SIN CAMBIOS)
         - id: inventario
           uri: http://localhost:8083
           predicates:
             - Path=/api/inventario/**
+
+        # 📦 ENVIO SERVICE (SIN CAMBIOS)
         - id: envio
           uri: http://localhost:8084
           predicates:
