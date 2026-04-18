@@ -7,7 +7,7 @@ on:
       - 'backend/msvc-authService/**'
       - 'backend/msvc-config/**'
       - 'backend/msvc-eureka/**'
-      - #TODO agregar ruta similar a las de arriba
+    #TODO agregar ruta similar a las de arriba
 
 jobs:
   detect-changes:
