@@ -7,6 +7,7 @@ on:
       - 'backend/msvc-authService/**'
       - 'backend/msvc-config/**'
       - 'backend/msvc-eureka/**'
+      - #TODO agregar ruta similar a las de arriba
 
 jobs:
   detect-changes:
@@ -15,6 +16,7 @@ jobs:
       auth: ${{ steps.filter.outputs.auth }}
       config: ${{ steps.filter.outputs.config }}
       eureka: ${{ steps.filter.outputs.eureka }}
+      #TODO agregar ruta similar a las de arriba
     steps:
       - uses: actions/checkout@v3
       - uses: dorny/paths-filter@v2
@@ -27,6 +29,7 @@ jobs:
               - 'backend/msvc-config/**'
             eureka:
               - 'backend/msvc-eureka/**'
+          #TODO agregar ruta similar a las de arriba
 
   build-config:
     needs: detect-changes
@@ -78,3 +81,21 @@ jobs:
           file: ./backend/msvc-authService/Dockerfile
           push: true
           tags: lblackdev/smartlogix-auth:latest
+
+      - name: Crear .env
+        run: |
+          echo "DATA_IP=${{ secrets.DATA_IP }}" > /home/ssm-user/smartlogix/.env
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> /home/ssm-user/smartlogix/.env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> /home/ssm-user/smartlogix/.env
+          echo "DB_NAME=${{ secrets.DB_NAME_AUTH }}" >> /home/ssm-user/smartlogix/.env
+
+      - name: Deploy contenedor
+        run: |
+          cd /home/ssm-user/smartlogix
+          docker-compose up -d msvc-auth
+
+          #TODO agregar ruta similar a las de arriba por ejemplo el build-auth
+          #TODO repo faltantes por subir al dockerhub
+          #smartlogix-envio
+          #smartlogix-pedido
+          #smartlogix-inventario

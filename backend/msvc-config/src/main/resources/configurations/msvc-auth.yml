@@ -6,7 +6,7 @@ spring:
     name: msvc-auth
 #TODO Cambiar direccion de la BD
   datasource:
-    url: jdbc:postgresql:http://msvc-config:5432/auth_db
+    url: jdbc:postgresql://#{DATA_IP:localhost}:5432/auth_db
     username: postgres
     password: Redimi2one2025*
     driver-class-name: org.postgresql.Driver
