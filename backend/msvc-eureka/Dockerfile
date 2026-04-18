@@ -1,9 +1,14 @@
 # Build
 FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
-COPY pom.xml .
+#POM PADORE
+COPY pom.xml ./parent-pom.xml
+RUN mvn install -f parent-pom.xml -N -B
+#hijo
+COPY msvc-eureka/pom.xml ./pom.xml
 RUN mvn dependency:go-offline -B
-COPY src ./src
+
+COPY msvc-eureka/src ./src
 RUN mvn clean package -DskipTests -B
 
 # ──jre runtime
