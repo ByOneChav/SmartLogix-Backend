@@ -72,6 +72,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - uses: docker/build-push-action@v5
         with:
-          context: ./backend/msvc-authService
+          context: ./backend
+          file: ./backend/msvc-authService/Dockerfile
           push: true
           tags: lblackdev/smartlogix-auth:latest
