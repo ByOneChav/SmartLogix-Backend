@@ -25,3 +25,4 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 
 
 # trigger
+# rebuild
