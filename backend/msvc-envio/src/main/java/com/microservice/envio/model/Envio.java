@@ -33,4 +33,44 @@ public class Envio {
 
     @Column(name = "inventario_id")
     private Long inventarioId;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    public Integer getCantidad() {
+        return cantidad;
+    }
+
+    public void setCantidad(Integer cantidad) {
+        this.cantidad = cantidad;
+    }
+
+    public Integer getPrecio() {
+        return precio;
+    }
+
+    public void setPrecio(Integer precio) {
+        this.precio = precio;
+    }
+
+    public Long getInventarioId() {
+        return inventarioId;
+    }
+
+    public void setInventarioId(Long inventarioId) {
+        this.inventarioId = inventarioId;
+    }
 }
