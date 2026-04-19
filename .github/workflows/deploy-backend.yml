@@ -7,6 +7,7 @@ on:
       - 'backend/msvc-authService/**'
       - 'backend/msvc-config/**'
       - 'backend/msvc-eureka/**'
+      - 'frontend/**'
     #TODO agregar ruta similar a las de arriba
 
 jobs:
@@ -16,6 +17,7 @@ jobs:
       auth: ${{ steps.filter.outputs.auth }}
       config: ${{ steps.filter.outputs.config }}
       eureka: ${{ steps.filter.outputs.eureka }}
+      frontend: ${{ steps.filter.outputs.frontend }}
       #TODO agregar ruta similar a las de arriba
     steps:
       - uses: actions/checkout@v3
@@ -29,6 +31,8 @@ jobs:
               - 'backend/msvc-config/**'
             eureka:
               - 'backend/msvc-eureka/**'
+            frontend:
+                - 'frontend/**'
           #TODO agregar ruta similar a las de arriba
 
   build-config:
@@ -99,3 +103,20 @@ jobs:
           #smartlogix-envio
           #smartlogix-pedido
           #smartlogix-inventario
+
+  build-frontend:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.frontend == 'true'
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: lblackdev/smartlogix-frontend:latest

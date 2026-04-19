@@ -79,6 +79,8 @@ docker-compose.override.yml
 # 🔧 Logs de Spring Boot
 
 # ===============================
+#node moduls
+frontend/node_modules/
 
 logs/
 
