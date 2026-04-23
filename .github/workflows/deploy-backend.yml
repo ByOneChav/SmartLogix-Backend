@@ -1,15 +1,18 @@
 name: Deploy Backend
 
 on:
-  push:
-    branches: [ main, BlackDev ]
-    paths:
-      - 'backend/msvc-authService/**'
-      - 'backend/msvc-config/**'
-      - 'backend/msvc-eureka/**'
-      - 'frontend/**'
-      - 'backend/msvc-gateway/**'
-    #TODO agregar ruta similar a las de arriba
+  workflow_dispatch:
+
+#on:
+#  push:
+#    branches: [ main, BlackDev ]
+#    paths:
+#      - 'backend/msvc-authService/**'
+#      - 'backend/msvc-config/**'
+#      - 'backend/msvc-eureka/**'
+#      - 'frontend/**'
+#      - 'backend/msvc-gateway/**'
+#    #TODO agregar ruta similar a las de arriba
 
 jobs:
   detect-changes:

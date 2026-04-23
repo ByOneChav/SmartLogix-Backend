@@ -1,16 +1,41 @@
+#server:
+#  port: 8081
+#
+#spring:
+#  application:
+#    name: msvc-auth
+##TODO Cambiar direccion de la BD
+#  datasource:
+#    url: jdbc:postgresql://#{DATA_IP:localhost}:5432/auth_db
+#    username: postgres
+#    password: Redimi2one2025*
+#    driver-class-name: org.postgresql.Driver
+#
+#  jpa:
+#    hibernate:
+#      ddl-auto: update
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.PostgreSQLDialect
+#
+#application:
+#  security:
+#    jwt:
+#      secret-key: 9f8d7a6s5d4f3g2h1j0k9l8m7n6b5v4c3x2z1q
+#      expiration: 86400000
+#
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: http://msvc-eureka:8761/eureka
+
+#REFACTORIZACION 22/04 PERFILAMIENTO
 server:
   port: 8081
 
 spring:
   application:
     name: msvc-auth
-#TODO Cambiar direccion de la BD
-  datasource:
-    url: jdbc:postgresql://#{DATA_IP:localhost}:5432/auth_db
-    username: postgres
-    password: Redimi2one2025*
-    driver-class-name: org.postgresql.Driver
-
   jpa:
     hibernate:
       ddl-auto: update
@@ -23,8 +48,3 @@ application:
     jwt:
       secret-key: 9f8d7a6s5d4f3g2h1j0k9l8m7n6b5v4c3x2z1q
       expiration: 86400000
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://msvc-eureka:8761/eureka
