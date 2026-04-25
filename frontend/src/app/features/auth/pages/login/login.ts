@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {AuthService} from '../../services/auth';
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-login',
@@ -13,11 +14,10 @@ import {AuthService} from '../../services/auth';
 export class Login {
   email = '';
   password = '';
-
   error = '';
   loading = false;
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   login(): void {
     this.loading = true;
@@ -30,7 +30,8 @@ export class Login {
         localStorage.setItem('token', res.token);
         localStorage.setItem('user', JSON.stringify(res.user));
 
-        alert('login correcto');
+        this.router.navigate(['/dashboard']);
+        // alert('login correcto');
 
         this.loading = false;
       },

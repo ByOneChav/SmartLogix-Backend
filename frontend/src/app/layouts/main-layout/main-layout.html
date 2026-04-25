@@ -1,1 +1,25 @@
-<p>main-layout works!</p>
+<mat-sidenav-container class="sidenav-container">
+    <mat-sidenav mode="side" opened class="sidenav">
+        <div class="sidenav-content">
+            <div>
+                <h3 class="p-3 fw-bold" style="color:#F4F7FF">SmartLogix</h3>
+                <mat-nav-list>
+                    <a mat-list-item routerLink="/dashboard" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">Dashboard</a>
+                    <a mat-list-item routerLink="/dashboard/inventario" routerLinkActive="active-link">Inventario</a>
+                    <a mat-list-item routerLink="/dashboard/pedidos" routerLinkActive="active-link">Pedidos</a>
+                    <a mat-list-item routerLink="/dashboard/envios" routerLinkActive="active-link">Envios</a>
+                </mat-nav-list>
+            </div>
+            <div class="logout-container">
+                <button mat-list-item (click)="logout()" class="logout-btn">
+                    Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </mat-sidenav>
+
+
+    <mat-sidenav-content class="content">
+        <router-outlet></router-outlet>
+    </mat-sidenav-content>
+</mat-sidenav-container>

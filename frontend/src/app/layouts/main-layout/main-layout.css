@@ -1,0 +1,54 @@
+.sidenav-container {
+    height: 100vh;
+}
+
+.sidenav {
+    width: 240px;
+    background-color: #0B1448;
+    color: #A8B3E6;
+    display: flex;
+    flex-direction: column;
+}
+
+.logout-container {
+    margin-top: auto;
+    padding: 16px;
+}
+
+.logout-btn {
+    width: 100%;
+    padding: 10px;
+    background: none;
+    border: 1px solid rgba(255,45,170, 0.3);
+    border-radius: 15px;
+    color: #FF2DAA;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.logout-btn:hover {
+    background-color: rgba(255,45,170, 0.15);
+}
+
+::ng-deep .sidenav .mat-mdc-list-item:hover {
+    background-color: rgba(255, 45, 170, 0.15);
+    color: #FF2DAA;
+}
+
+::ng-deep .sidenav .active-link {
+    background-color: rgba(255, 45, 170, 0.2);
+    color: #FF2DAA;
+}
+
+.content {
+    padding: 24px;
+}
+
+.sidenav-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
