@@ -1,21 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { EnvioService } from '../../services/envio.service';
-import { Envio } from '../../models/envio.model';
+import { PedidoService } from '../../services/pedido.service';
+import { Pedido } from '../../models/pedido.model';
 
 @Component({
-  selector: 'app-envio',
+  selector: 'app-pedidos',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './envio.html',
-  styleUrl: './envio.css'
+  templateUrl: './pedidos.html',
+  styleUrl: './pedidos.css'
 })
-export class EnvioComponent implements OnInit {
+export class PedidosComponent implements OnInit {
 
-  envios: Envio[] = [];
+  pedidos: Pedido[] = [];
 
-  nuevo: Envio = {
+  nuevo: Pedido = {
     descripcion: '',
     cantidad: 0,
     precio: 0,
@@ -27,24 +27,24 @@ export class EnvioComponent implements OnInit {
   modalVisible = false;
   mensajeModal = '';
 
-  constructor(private envioService: EnvioService) {}
+  constructor(private pedidoService: PedidoService) {}
 
   ngOnInit(): void {
-    this.cargarEnvios();
+    this.cargarPedidos();
   }
 
-  cargarEnvios(): void {
-    this.envioService.getAll().subscribe(data => {
-      this.envios = [...data];
+  cargarPedidos(): void {
+    this.pedidoService.getAll().subscribe(data => {
+      this.pedidos = [...data];
     });
   }
 
   guardar(): void {
-    this.mostrarModal(this.editando ? 'Actualizando envío...' : 'Guardando envío...');
+    this.mostrarModal(this.editando ? 'Actualizando pedido...' : 'Guardando pedido...');
 
     const operacion = this.editando && this.idEditando !== null
-      ? this.envioService.update(this.idEditando, this.nuevo)
-      : this.envioService.create(this.nuevo);
+      ? this.pedidoService.update(this.idEditando, this.nuevo)
+      : this.pedidoService.create(this.nuevo);
 
     operacion.subscribe({
       next: () => this.finalizarOperacion(),
@@ -52,22 +52,22 @@ export class EnvioComponent implements OnInit {
     });
   }
 
-  editar(item: Envio): void {
+  editar(item: Pedido): void {
     this.nuevo = { ...item };
     this.editando = true;
     this.idEditando = item.id!;
   }
 
   eliminar(id: number): void {
-    this.mostrarModal('Eliminando envío...');
-    this.envioService.delete(id).subscribe({
+    this.mostrarModal('Eliminando pedido...');
+    this.pedidoService.delete(id).subscribe({
       next: () => this.finalizarOperacion(),
       error: () => this.cerrarModal()
     });
   }
 
   private finalizarOperacion(): void {
-    this.cargarEnvios();
+    this.cargarPedidos();
     this.resetFormulario();
     setTimeout(() => this.cerrarModal(), 800);
   }

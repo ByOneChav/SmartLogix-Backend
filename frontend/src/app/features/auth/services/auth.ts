@@ -14,10 +14,11 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   login(data: LoginRequestModel): Observable<LoginResponseModel> {
-    return this.http.post<LoginResponseModel>(
-        `${this.apiUrl}/login`,
-        data
-    );
+    return this.http.post<LoginResponseModel>(`${this.apiUrl}/login`, data);
+  }
+
+  register(data: { name: string; email: string; password: string; rol: string }): Observable<LoginResponseModel> {
+    return this.http.post<LoginResponseModel>(`${this.apiUrl}/register`, data);
   }
 
   logout(): void {

@@ -1,20 +1,8 @@
-/* 🌈 Fondo general */
-body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
-}
-
 /* HEADER */
 .header {
   text-align: center;
   color: white;
   padding: 20px;
-}
-
-.header img {
-  width: 60px;
-  margin-bottom: 10px;
 }
 
 /* CONTENEDOR PRINCIPAL */
@@ -33,10 +21,9 @@ body {
   border-radius: 12px;
   padding: 20px;
   width: 400px;
-  box-shadow: 0px 5px 20px rgba(0,0,0,0.2);
+  box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.2);
 }
 
-/* TITULOS */
 h2 {
   margin-bottom: 15px;
 }
@@ -48,6 +35,7 @@ input {
   margin-bottom: 10px;
   border-radius: 8px;
   border: 1px solid #ccc;
+  box-sizing: border-box;
 }
 
 /* BOTÓN PRINCIPAL */
@@ -59,7 +47,7 @@ input {
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: 0.3s;
+  transition: background 0.3s;
 }
 
 .btn-primary:hover {
@@ -87,7 +75,16 @@ tr:nth-child(even) {
   background: #f2f2f2;
 }
 
-/* BOTÓN ELIMINAR */
+/* BOTONES ACCIONES */
+.btn-edit {
+  background: #ffc107;
+  border: none;
+  padding: 5px 10px;
+  margin-right: 5px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
 .btn-delete {
   background: #dc3545;
   color: white;
@@ -101,41 +98,6 @@ tr:nth-child(even) {
   background: #c82333;
 }
 
-/* 🔄 LOADING */
-.loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
-/* 🔄 SPINNER */
-.spinner {
-  width: 15px;
-  height: 15px;
-  border: 3px solid white;
-  border-top: 3px solid transparent;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-/* 🔄 ANIMACIÓN */
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-
-/* BOTÓN EDITAR */
-.btn-edit {
-  background: #ffc107;
-  border: none;
-  padding: 5px 10px;
-  margin-right: 5px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
 /* MODAL */
 .modal {
   position: fixed;
@@ -143,13 +105,13 @@ tr:nth-child(even) {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
 
-/* CONTENIDO MODAL */
 .modal-content {
   background: white;
   padding: 25px;
@@ -158,7 +120,6 @@ tr:nth-child(even) {
   width: 250px;
 }
 
-/* SPINNER GRANDE */
 .spinner-modal {
   width: 30px;
   height: 30px;
@@ -168,4 +129,9 @@ tr:nth-child(even) {
   display: inline-block;
   animation: spin 1s linear infinite;
   margin-bottom: 10px;
+}
+
+@keyframes spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

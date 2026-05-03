@@ -1,24 +1,47 @@
-import { Component } from "@angular/core";
-import {DashboardCard} from "../../components/dashboard-card/dashboard-card";
-import {DashboardTable} from "../../components/dashboard-table/dashboard-table";
+import { Component, OnInit } from '@angular/core';
+import { DashboardCard } from '../../components/dashboard-card/dashboard-card';
+import { DashboardTable } from '../../components/dashboard-table/dashboard-table';
+import { PedidoService } from '../../../pedidos/services/pedido.service';
+import { InventarioService } from '../../../inventario/services/inventario.service';
+import { EnvioService } from '../../../envio/services/envio.service';
+import { Pedido } from '../../../pedidos/models/pedido.model';
 
 @Component({
-  selector: "app-dashboard",
-  imports: [
-    DashboardCard, DashboardTable
-  ],
-  templateUrl: "./dashboard.html",
-  styleUrl: "./dashboard.css",
+  selector: 'app-dashboard',
+  standalone: true,
+  imports: [DashboardCard, DashboardTable],
+  templateUrl: './dashboard.html',
+  styleUrl: './dashboard.css'
 })
-export class Dashboard {
+export class Dashboard implements OnInit {
 
-  columnas = ['ID', 'Cliente', 'Producto', 'Estado', 'Fecha'];
+  columnas = ['ID', 'Descripción', 'Cantidad', 'Precio', 'Inventario ID'];
+  pedidos: Pedido[] = [];
 
-  pedidos = [
-    { ID: '#001', Cliente: 'Juan Pérez', Producto: 'Laptop HP', Estado: 'Entregado', Fecha: '25/04/2026' },
-    { ID: '#002', Cliente: 'María López', Producto: 'Mouse Logitech', Estado: 'En tránsito', Fecha: '24/04/2026' },
-    { ID: '#003', Cliente: 'Carlos Díaz', Producto: 'Monitor Samsung', Estado: 'Preparando', Fecha: '24/04/2026' },
-    { ID: '#004', Cliente: 'Ana Rojas', Producto: 'Teclado Mecánico', Estado: 'Cancelado', Fecha: '23/04/2026' },
-  ];
+  totalInventario = '—';
+  totalPedidos = '—';
+  totalEnvios = '—';
 
+  constructor(
+    private pedidoService: PedidoService,
+    private inventarioService: InventarioService,
+    private envioService: EnvioService
+  ) {}
+
+  ngOnInit(): void {
+    this.pedidoService.getAll().subscribe({
+      next: data => {
+        this.pedidos = data;
+        this.totalPedidos = String(data.length);
+      }
+    });
+
+    this.inventarioService.getAll().subscribe({
+      next: data => this.totalInventario = String(data.length)
+    });
+
+    this.envioService.getAll().subscribe({
+      next: data => this.totalEnvios = String(data.length)
+    });
+  }
 }

@@ -1,13 +1,13 @@
 <!-- HEADER -->
 <div class="header">
-  <h1>Gestión de Envíos</h1>
+  <h1>Gestión de Pedidos</h1>
 </div>
 
 <div class="container">
 
   <!-- FORMULARIO -->
   <div class="form-card">
-    <h2>{{ editando ? 'Actualizar Envío' : 'Registrar Envío' }}</h2>
+    <h2>{{ editando ? 'Actualizar Pedido' : 'Registrar Pedido' }}</h2>
 
     <form (ngSubmit)="guardar()">
 
@@ -32,7 +32,7 @@
 
   <!-- TABLA -->
   <div class="table-card">
-    <h2>Lista de Envíos</h2>
+    <h2>Lista de Pedidos</h2>
 
     <table>
       <thead>
@@ -46,7 +46,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let item of envios">
+        <tr *ngFor="let item of pedidos">
           <td>{{ item.id }}</td>
           <td>{{ item.descripcion }}</td>
           <td>{{ item.cantidad }}</td>

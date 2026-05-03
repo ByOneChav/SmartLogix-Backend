@@ -1,11 +1,13 @@
 spring:
   datasource:
-    url: jdbc:postgresql://${DATA_IP}:5432/enviodb
+    url: jdbc:postgresql://${DATA_IP}:5432/pedido_db
     username: postgres
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
 eureka:
+  instance:
+    hostname: localhost
   client:
     service-url:
       defaultZone: http://<IP-EC2-EUREKA>:8761/eureka
