@@ -1,5 +1,6 @@
 package com.microservice.envio.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,13 +23,16 @@ public class Envio {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "ID del envio autogenerado", accessMode = Schema.AccessMode.READ_ONLY)
     private Long id;
 
+    @Column(name = "descripcion")
     private String descripcion;
 
     @Column(name = "cantidad")
     private Integer cantidad;
 
+    @Column(name = "precio")
     private Integer precio;
 
     @Column(name = "inventario_id")
