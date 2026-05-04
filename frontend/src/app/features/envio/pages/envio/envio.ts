@@ -1,8 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { EnvioService } from '../../services/envio.service';
-import { Envio } from '../../models/envio.model';
+import { Envio, EstadoEnvio } from '../../models/envio.model';
+import { PedidoService } from '../../../pedidos/services/pedido.service';
+import { Pedido } from '../../../pedidos/models/pedido.model';
 
 @Component({
   selector: 'app-envio',
@@ -14,76 +17,128 @@ import { Envio } from '../../models/envio.model';
 export class EnvioComponent implements OnInit {
 
   envios: Envio[] = [];
+  pedidosDisponibles: Pedido[] = [];
 
   nuevo: Envio = {
-    descripcion: '',
-    cantidad: 0,
-    precio: 0,
-    inventarioId: 0
+    pedidoId: 0,
+    direccionDestino: ''
   };
 
-  editando = false;
-  idEditando: number | null = null;
-  modalVisible = false;
-  mensajeModal = '';
+  loading = false;
+  cargandoLista = true;
+  error = '';
+  success = '';
 
-  constructor(private envioService: EnvioService) {}
+  constructor(
+    private envioService: EnvioService,
+    private pedidoService: PedidoService,
+    private cd: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
-    this.cargarEnvios();
+    this.cargarDatos();
   }
 
-  cargarEnvios(): void {
-    this.envioService.getAll().subscribe(data => {
-      this.envios = [...data];
+  cargarDatos(): void {
+    this.cargandoLista = true;
+    this.envioService.getAll().pipe(finalize(() => this.cargandoLista = false)).subscribe({
+      next: data => {
+        this.envios = Array.isArray(data) ? data : [];
+        this.cd.detectChanges();
+      },
+      error: () => {
+        this.envios = [];
+        this.cd.detectChanges();
+      }
+    });
+    this.pedidoService.getAll().subscribe({
+      next: data => {
+        this.pedidosDisponibles = Array.isArray(data)
+          ? data.filter(p => p.estado === 'CONFIRMADO' || p.estado === 'EN_PREPARACION')
+          : [];
+        this.cd.detectChanges();
+      },
+      error: () => this.pedidosDisponibles = []
     });
   }
 
-  guardar(): void {
-    this.mostrarModal(this.editando ? 'Actualizando envío...' : 'Guardando envío...');
+  crearEnvio(): void {
+    this.loading = true;
+    this.error = '';
+    this.success = '';
 
-    const operacion = this.editando && this.idEditando !== null
-      ? this.envioService.update(this.idEditando, this.nuevo)
-      : this.envioService.create(this.nuevo);
-
-    operacion.subscribe({
-      next: () => this.finalizarOperacion(),
-      error: () => this.cerrarModal()
+    this.envioService.create(this.nuevo).pipe(finalize(() => this.loading = false)).subscribe({
+      next: envio => {
+        this.success = `Envío #${envio.id} creado para pedido #${envio.pedidoId}`;
+        this.cargarDatos();
+        this.resetFormulario();
+      },
+      error: e => {
+        this.error = e.error || 'Error al crear envío. Verifique el ID del pedido.';
+      }
     });
   }
 
-  editar(item: Envio): void {
-    this.nuevo = { ...item };
-    this.editando = true;
-    this.idEditando = item.id!;
+  avanzarEstado(envio: Envio): void {
+    const siguiente = this.getSiguienteEstado(envio.estado!);
+    if (!siguiente) return;
+    this.envioService.cambiarEstado(envio.id!, siguiente).subscribe({
+      next: () => { this.cargarDatos(); this.success = ''; },
+      error: () => this.error = 'Error al cambiar estado'
+    });
+  }
+
+  devolverEnvio(envio: Envio): void {
+    if (!confirm('¿Marcar este envío como DEVUELTO?')) return;
+    this.envioService.cambiarEstado(envio.id!, 'DEVUELTO').subscribe({
+      next: () => this.cargarDatos(),
+      error: () => this.error = 'Error al actualizar estado'
+    });
   }
 
   eliminar(id: number): void {
-    this.mostrarModal('Eliminando envío...');
+    if (!confirm('¿Eliminar este envío?')) return;
     this.envioService.delete(id).subscribe({
-      next: () => this.finalizarOperacion(),
-      error: () => this.cerrarModal()
+      next: () => this.cargarDatos(),
+      error: () => this.error = 'Error al eliminar'
     });
   }
 
-  private finalizarOperacion(): void {
-    this.cargarEnvios();
-    this.resetFormulario();
-    setTimeout(() => this.cerrarModal(), 800);
+  getSiguienteEstado(estado: EstadoEnvio): EstadoEnvio | null {
+    const flujo: Partial<Record<EstadoEnvio, EstadoEnvio>> = {
+      'PREPARANDO': 'EN_TRANSITO',
+      'EN_TRANSITO': 'ENTREGADO'
+    };
+    return flujo[estado] ?? null;
+  }
+
+  getSiguienteLabel(estado?: EstadoEnvio): string {
+    const labels: Partial<Record<EstadoEnvio, string>> = {
+      'PREPARANDO': 'En Tránsito',
+      'EN_TRANSITO': 'Entregar'
+    };
+    return estado ? (labels[estado] ?? '') : '';
+  }
+
+  puedeAvanzar(estado?: EstadoEnvio): boolean {
+    return estado === 'PREPARANDO' || estado === 'EN_TRANSITO';
+  }
+
+  puedeDevolver(estado?: EstadoEnvio): boolean {
+    return estado === 'EN_TRANSITO';
+  }
+
+  getBadgeClass(estado?: EstadoEnvio): string {
+    const clases: Partial<Record<EstadoEnvio, string>> = {
+      'PREPARANDO': 'badge-orange',
+      'EN_TRANSITO': 'badge-info',
+      'ENTREGADO': 'badge-success',
+      'DEVUELTO': 'badge-danger'
+    };
+    return estado ? (clases[estado] ?? '') : '';
   }
 
   private resetFormulario(): void {
-    this.nuevo = { descripcion: '', cantidad: 0, precio: 0, inventarioId: 0 };
-    this.editando = false;
-    this.idEditando = null;
-  }
-
-  private mostrarModal(mensaje: string): void {
-    this.mensajeModal = mensaje;
-    this.modalVisible = true;
-  }
-
-  private cerrarModal(): void {
-    this.modalVisible = false;
+    this.nuevo = { pedidoId: 0, direccionDestino: '' };
   }
 }

@@ -21,8 +21,8 @@ export class PedidoService {
     return this.http.post<Pedido>(`${this.apiUrl}/create`, data);
   }
 
-  update(id: number, data: Pedido): Observable<Pedido> {
-    return this.http.put<Pedido>(`${this.apiUrl}/update/${id}`, data);
+  cambiarEstado(id: number, estado: string): Observable<Pedido> {
+    return this.http.put<Pedido>(`${this.apiUrl}/update/${id}/estado?estado=${estado}`, {});
   }
 
   delete(id: number): Observable<void> {

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable,ChangeDetectorRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
@@ -11,7 +11,7 @@ export class InventarioService {
 
   private apiUrl = `${environment.apiUrl}/api/inventario`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getAll(): Observable<Inventario[]> {
     return this.http.get<Inventario[]>(this.apiUrl);

@@ -1,10 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { DashboardCard } from '../../components/dashboard-card/dashboard-card';
 import { DashboardTable } from '../../components/dashboard-table/dashboard-table';
 import { PedidoService } from '../../../pedidos/services/pedido.service';
 import { InventarioService } from '../../../inventario/services/inventario.service';
 import { EnvioService } from '../../../envio/services/envio.service';
-import { Pedido } from '../../../pedidos/models/pedido.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -15,8 +14,8 @@ import { Pedido } from '../../../pedidos/models/pedido.model';
 })
 export class Dashboard implements OnInit {
 
-  columnas = ['ID', 'Descripción', 'Cantidad', 'Precio', 'Inventario ID'];
-  pedidos: Pedido[] = [];
+  columnas = ['ID', 'Cliente', 'Descripción', 'Cant.', 'Precio', 'Estado'];
+  pedidos: any[] = [];
 
   totalInventario = '—';
   totalPedidos = '—';
@@ -25,23 +24,55 @@ export class Dashboard implements OnInit {
   constructor(
     private pedidoService: PedidoService,
     private inventarioService: InventarioService,
-    private envioService: EnvioService
+    private envioService: EnvioService,
+    private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.pedidoService.getAll().subscribe({
       next: data => {
-        this.pedidos = data;
-        this.totalPedidos = String(data.length);
+        const lista = Array.isArray(data) ? data : [];
+        this.totalPedidos = String(lista.length);
+        this.pedidos = lista.map(p => ({
+          'ID': p.id,
+          'Cliente': p.clienteNombre,
+          'Descripción': p.descripcion,
+          'Cant.': p.cantidad,
+          'Precio': `$${p.precio ?? 0}`,
+          'Estado': p.estado
+        }));
+        this.cd.detectChanges();
+      },
+      error: err => {
+        console.log(err);
+        this.pedidos = [];
+        this.totalPedidos = '0';
+        this.cd.detectChanges();
       }
     });
 
     this.inventarioService.getAll().subscribe({
-      next: data => this.totalInventario = String(data.length)
+      next: data => {
+        const lista = data ?? [];
+        this.totalInventario = String(lista.length);
+        this.cd.detectChanges();
+      },
+      error: err => {
+        console.log(err);
+        this.totalInventario = '0';
+        this.cd.detectChanges();
+      }
     });
 
     this.envioService.getAll().subscribe({
-      next: data => this.totalEnvios = String(data.length)
+      next: data => {
+        this.totalEnvios = String(data.length);
+        this.cd.detectChanges();
+      },
+      error: () => {
+        this.totalEnvios = '0';
+        this.cd.detectChanges();
+      }
     });
   }
 }

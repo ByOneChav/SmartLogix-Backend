@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { InventarioService } from '../../services/inventario.service';
 import { Inventario } from '../../models/inventario.model';
 
@@ -19,36 +20,57 @@ export class InventarioComponent implements OnInit {
     nombreProducto: '',
     ubicacion: '',
     stock: 0,
+    stockMinimo: 5,
     precio: 0
   };
 
   editando = false;
   idEditando: number | null = null;
-  modalVisible = false;
-  mensajeModal = '';
+  loading = false;
+  cargandoLista = true;
+  error = '';
 
-  constructor(private inventarioService: InventarioService) {}
+  constructor(private inventarioService: InventarioService,
+              private cd: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.cargarInventario();
   }
 
   cargarInventario(): void {
-    this.inventarioService.getAll().subscribe(data => {
-      this.inventarios = [...data];
+    this.cargandoLista = true;
+
+    this.inventarioService.getAll().subscribe({
+      next: data => {
+        this.inventarios = data;
+        this.cargandoLista = false;
+        this.cd.detectChanges();
+      },
+      error: () => {
+        this.inventarios = [];
+        this.error = 'Error al cargar inventario';
+        this.cargandoLista = false;
+        this.cd.detectChanges();
+      }
     });
   }
 
   guardar(): void {
-    this.mostrarModal(this.editando ? 'Actualizando producto...' : 'Guardando producto...');
+    this.loading = true;
+    this.error = '';
 
-    const operacion = this.editando && this.idEditando !== null
+    const op = this.editando && this.idEditando !== null
       ? this.inventarioService.update(this.idEditando, this.nuevo)
       : this.inventarioService.create(this.nuevo);
 
-    operacion.subscribe({
-      next: () => this.finalizarOperacion(),
-      error: () => this.cerrarModal()
+    op.pipe(finalize(() => this.loading = false)).subscribe({
+      next: () => {
+        this.cargarInventario();
+        this.resetFormulario();
+      },
+      error: () => {
+        this.error = 'Error al guardar producto';
+      }
     });
   }
 
@@ -56,34 +78,28 @@ export class InventarioComponent implements OnInit {
     this.nuevo = { ...item };
     this.editando = true;
     this.idEditando = item.id!;
+    this.error = '';
+  }
+
+  cancelarEdicion(): void {
+    this.resetFormulario();
   }
 
   eliminar(id: number): void {
-    this.mostrarModal('Eliminando producto...');
+    if (!confirm('¿Eliminar este producto del inventario?')) return;
     this.inventarioService.delete(id).subscribe({
-      next: () => this.finalizarOperacion(),
-      error: () => this.cerrarModal()
+      next: () => this.cargarInventario(),
+      error: () => this.error = 'Error al eliminar'
     });
   }
 
-  private finalizarOperacion(): void {
-    this.cargarInventario();
-    this.resetFormulario();
-    setTimeout(() => this.cerrarModal(), 800);
+  esStockBajo(item: Inventario): boolean {
+    return item.stockMinimo !== undefined && item.stock <= item.stockMinimo;
   }
 
   private resetFormulario(): void {
-    this.nuevo = { nombreProducto: '', ubicacion: '', stock: 0, precio: 0 };
+    this.nuevo = { nombreProducto: '', ubicacion: '', stock: 0, stockMinimo: 5, precio: 0 };
     this.editando = false;
     this.idEditando = null;
-  }
-
-  private mostrarModal(mensaje: string): void {
-    this.mensajeModal = mensaje;
-    this.modalVisible = true;
-  }
-
-  private cerrarModal(): void {
-    this.modalVisible = false;
   }
 }

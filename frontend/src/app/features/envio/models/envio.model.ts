@@ -1,7 +1,13 @@
+export type EstadoEnvio =
+  | 'PREPARANDO'
+  | 'EN_TRANSITO'
+  | 'ENTREGADO'
+  | 'DEVUELTO';
+
 export interface Envio {
   id?: number;
-  descripcion: string;
-  cantidad: number;
-  precio: number;
-  inventarioId: number;
+  pedidoId: number;
+  direccionDestino: string;
+  estado?: EstadoEnvio;
+  fechaEnvio?: string;
 }

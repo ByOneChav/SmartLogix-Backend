@@ -1,76 +1,35 @@
 package com.microservice.envio.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDateTime;
 
 /**
- * Entidad que representa la tabla envio
+ * Entidad Envio.
+ * Representa el despacho físico creado a partir de un Pedido confirmado.
+ * Estado inicial: PREPARANDO → EN_TRANSITO → ENTREGADO (o DEVUELTO)
  */
 @Entity
-@Getter
-@Setter
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 @Table(name = "envio")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Envio {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String descripcion;
+    @Column(name = "pedido_id")
+    private Long pedidoId;
 
-    @Column(name = "cantidad")
-    private Integer cantidad;
+    @Column(name = "direccion_destino")
+    private String direccionDestino;
 
-    private Integer precio;
+    @Enumerated(EnumType.STRING)
+    private EstadoEnvio estado;
 
-    @Column(name = "inventario_id")
-    private Long inventarioId;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getDescripcion() {
-        return descripcion;
-    }
-
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
-
-    public Integer getCantidad() {
-        return cantidad;
-    }
-
-    public void setCantidad(Integer cantidad) {
-        this.cantidad = cantidad;
-    }
-
-    public Integer getPrecio() {
-        return precio;
-    }
-
-    public void setPrecio(Integer precio) {
-        this.precio = precio;
-    }
-
-    public Long getInventarioId() {
-        return inventarioId;
-    }
-
-    public void setInventarioId(Long inventarioId) {
-        this.inventarioId = inventarioId;
-    }
+    @Column(name = "fecha_envio")
+    private LocalDateTime fechaEnvio;
 }

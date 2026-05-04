@@ -1,75 +1,103 @@
 package com.microservice.envio.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.microservice.envio.client.PedidoClient;
 import com.microservice.envio.model.Envio;
+import com.microservice.envio.model.EstadoEnvio;
 import com.microservice.envio.repository.EnvioRepository;
 
 import jakarta.transaction.Transactional;
 
 /**
- * Servicio que contiene la logica de negocio de envios
+ * Servicio de negocio para Envíos.
+ * Coordina estados con msvc-pedido via Feign:
+ *   - crearEnvio  → pedido pasa a ENVIADO
+ *   - ENTREGADO   → pedido pasa a ENTREGADO
+ *   - DEVUELTO    → pedido pasa a EN_PREPARACION (para re-despachar)
  */
 @Service
 @Transactional
 public class EnvioService {
 
-	private final EnvioRepository envioRepository;
+    private static final Logger log = LoggerFactory.getLogger(EnvioService.class);
 
-	public EnvioService(EnvioRepository envioRepository) {
-		this.envioRepository = envioRepository;
-	}
+    private final EnvioRepository envioRepository;
+    private final PedidoClient pedidoClient;
 
-	/**
-	 * Obtener todos los envios
-	 */
-	public List<Envio> findAll() {
-		return envioRepository.findAll();
-	}
+    public EnvioService(EnvioRepository envioRepository, PedidoClient pedidoClient) {
+        this.envioRepository = envioRepository;
+        this.pedidoClient = pedidoClient;
+    }
 
-	/**
-	 * Buscar envio por ID
-	 */
-	public Envio findById(Long id) {
-		return envioRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("Envio no encontrado"));
-	}
+    public List<Envio> findAll() {
+        return envioRepository.findAll();
+    }
 
-	/**
-	 * Guardar envio
-	 */
-	public Envio save(Envio envio) {
-		return envioRepository.save(envio);
-	}
+    public Envio findById(Long id) {
+        return envioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Envio no encontrado con ID: " + id));
+    }
 
-	/**
-	 * Actualizar envio
-	 */
-	public Envio update(Long id, Envio envio) {
-		Envio existente = findById(id);
+    public Envio crearEnvio(Envio envio) {
+        if (envio.getPedidoId() == null) {
+            throw new RuntimeException("El pedidoId es obligatorio para crear un envio");
+        }
+        if (envio.getDireccionDestino() == null || envio.getDireccionDestino().isBlank()) {
+            throw new RuntimeException("La dirección de destino es obligatoria");
+        }
+        if (envioRepository.findByPedidoId(envio.getPedidoId()).isPresent()) {
+            throw new RuntimeException("Ya existe un envio para el pedido ID: " + envio.getPedidoId());
+        }
+        envio.setEstado(EstadoEnvio.PREPARANDO);
+        envio.setFechaEnvio(LocalDateTime.now());
+        Envio guardado = envioRepository.save(envio);
 
-		existente.setDescripcion(envio.getDescripcion());
-		existente.setCantidad(envio.getCantidad());
-		existente.setPrecio(envio.getPrecio());
-		existente.setInventarioId(envio.getInventarioId());
+        // Notificar al pedido que ya fue enviado
+        try {
+            pedidoClient.cambiarEstado(envio.getPedidoId(), "ENVIADO");
+        } catch (Exception e) {
+            log.warn("No se pudo actualizar el estado del pedido {}: {}", envio.getPedidoId(), e.getMessage());
+        }
 
-		return envioRepository.save(existente);
-	}
+        return guardado;
+    }
 
-	/**
-	 * Eliminar envio
-	 */
-	public void delete(Long id) {
-		envioRepository.deleteById(id);
-	}
+    public Envio cambiarEstado(Long id, EstadoEnvio nuevoEstado) {
+        Envio envio = findById(id);
+        envio.setEstado(nuevoEstado);
+        Envio guardado = envioRepository.save(envio);
 
-	/**
-	 * Buscar envios por inventarioId
-	 */
-	public List<Envio> findByInventarioId(Long inventarioId) {
-		return envioRepository.findAllByInventarioId(inventarioId);
-	}
+        // Sincronizar estado del pedido cuando el envío se entrega o devuelve
+        try {
+            if (nuevoEstado == EstadoEnvio.ENTREGADO) {
+                pedidoClient.cambiarEstado(envio.getPedidoId(), "ENTREGADO");
+            } else if (nuevoEstado == EstadoEnvio.DEVUELTO) {
+                pedidoClient.cambiarEstado(envio.getPedidoId(), "EN_PREPARACION");
+            }
+        } catch (Exception e) {
+            log.warn("No se pudo sincronizar el estado del pedido {}: {}", envio.getPedidoId(), e.getMessage());
+        }
 
+        return guardado;
+    }
+
+    public Envio update(Long id, Envio envio) {
+        Envio existente = findById(id);
+        existente.setDireccionDestino(envio.getDireccionDestino());
+        return envioRepository.save(existente);
+    }
+
+    public void delete(Long id) {
+        envioRepository.deleteById(id);
+    }
+
+    public List<Envio> findByPedidoId(Long pedidoId) {
+        return envioRepository.findAllByPedidoId(pedidoId);
+    }
 }

@@ -40,4 +40,9 @@ public class Inventario {
     @Column(nullable = false)
     @Schema(description = "Precio del producto", example = "500000")
     private Integer precio;
+
+    // Stock mínimo para alertas de reposición
+    @Column(name = "stock_minimo")
+    @Schema(description = "Stock mínimo de alerta. Se resalta en rojo cuando stock <= stockMinimo", example = "5")
+    private Integer stockMinimo;
 }

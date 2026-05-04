@@ -1,8 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { PedidoService } from '../../services/pedido.service';
-import { Pedido } from '../../models/pedido.model';
+import { Pedido, EstadoPedido } from '../../models/pedido.model';
+import { InventarioService } from '../../../inventario/services/inventario.service';
+import { Inventario } from '../../../inventario/models/inventario.model';
 
 @Component({
   selector: 'app-pedidos',
@@ -14,76 +17,149 @@ import { Pedido } from '../../models/pedido.model';
 export class PedidosComponent implements OnInit {
 
   pedidos: Pedido[] = [];
+  inventarios: Inventario[] = [];
+  inventarioSeleccionado: Inventario | null = null;
 
   nuevo: Pedido = {
+    clienteNombre: '',
     descripcion: '',
-    cantidad: 0,
-    precio: 0,
+    cantidad: 1,
     inventarioId: 0
   };
 
-  editando = false;
-  idEditando: number | null = null;
-  modalVisible = false;
-  mensajeModal = '';
+  loading = false;
+  cargandoLista = true;
+  error = '';
+  success = '';
 
-  constructor(private pedidoService: PedidoService) {}
+  constructor(
+    private pedidoService: PedidoService,
+    private inventarioService: InventarioService,
+    private cd: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
-    this.cargarPedidos();
+    this.cargarDatos();
   }
 
-  cargarPedidos(): void {
-    this.pedidoService.getAll().subscribe(data => {
-      this.pedidos = [...data];
+  cargarDatos(): void {
+    this.cargandoLista = true;
+    this.pedidoService.getAll().pipe(finalize(() => this.cargandoLista = false)).subscribe({
+      next: data => {
+        this.pedidos = Array.isArray(data) ? data : [];
+        this.cd.detectChanges();
+      },
+      error: () => {
+        this.pedidos = [];
+        this.cd.detectChanges();
+      }
+    });
+    this.inventarioService.getAll().subscribe({
+      next: data => {
+        this.inventarios = data;
+        this.cd.detectChanges();
+      },
+      error: () => this.inventarios = []
     });
   }
 
-  guardar(): void {
-    this.mostrarModal(this.editando ? 'Actualizando pedido...' : 'Guardando pedido...');
+  onInventarioChange(): void {
+    this.inventarioSeleccionado = this.inventarios.find(i => i.id === +this.nuevo.inventarioId) || null;
+    this.calcularPrecio();
+  }
 
-    const operacion = this.editando && this.idEditando !== null
-      ? this.pedidoService.update(this.idEditando, this.nuevo)
-      : this.pedidoService.create(this.nuevo);
+  onCantidadChange(): void {
+    this.calcularPrecio();
+  }
 
-    operacion.subscribe({
-      next: () => this.finalizarOperacion(),
-      error: () => this.cerrarModal()
+  calcularPrecio(): void {
+    if (this.inventarioSeleccionado && this.nuevo.cantidad > 0) {
+      this.nuevo.precio = this.inventarioSeleccionado.precio * this.nuevo.cantidad;
+    }
+  }
+
+  crearPedido(): void {
+    this.loading = true;
+    this.error = '';
+    this.success = '';
+
+    this.pedidoService.create(this.nuevo).pipe(finalize(() => this.loading = false)).subscribe({
+      next: pedido => {
+        this.success = `Pedido #${pedido.id} creado. Stock descontado automáticamente.`;
+        this.cargarDatos();
+        this.resetFormulario();
+      },
+      error: e => {
+        this.error = e.error || 'Error al crear pedido. Verifique el stock disponible.';
+      }
     });
   }
 
-  editar(item: Pedido): void {
-    this.nuevo = { ...item };
-    this.editando = true;
-    this.idEditando = item.id!;
+  avanzarEstado(pedido: Pedido): void {
+    const siguiente = this.getSiguienteEstado(pedido.estado!);
+    if (!siguiente) return;
+    this.pedidoService.cambiarEstado(pedido.id!, siguiente).subscribe({
+      next: () => { this.cargarDatos(); this.success = ''; },
+      error: () => this.error = 'Error al cambiar estado'
+    });
+  }
+
+  cancelarPedido(pedido: Pedido): void {
+    if (!confirm('¿Cancelar este pedido?')) return;
+    this.pedidoService.cambiarEstado(pedido.id!, 'CANCELADO').subscribe({
+      next: () => this.cargarDatos(),
+      error: () => this.error = 'Error al cancelar pedido'
+    });
   }
 
   eliminar(id: number): void {
-    this.mostrarModal('Eliminando pedido...');
+    if (!confirm('¿Eliminar este pedido?')) return;
     this.pedidoService.delete(id).subscribe({
-      next: () => this.finalizarOperacion(),
-      error: () => this.cerrarModal()
+      next: () => this.cargarDatos(),
+      error: () => this.error = 'Error al eliminar'
     });
   }
 
-  private finalizarOperacion(): void {
-    this.cargarPedidos();
-    this.resetFormulario();
-    setTimeout(() => this.cerrarModal(), 800);
+  getSiguienteEstado(estado: EstadoPedido): EstadoPedido | null {
+    const flujo: Partial<Record<EstadoPedido, EstadoPedido>> = {
+      'PENDIENTE': 'CONFIRMADO',
+      'CONFIRMADO': 'EN_PREPARACION'
+      // EN_PREPARACION → ENVIADO lo hace envio al crear el despacho
+      // ENVIADO → ENTREGADO lo hace envio al marcar como entregado
+    };
+    return flujo[estado] ?? null;
+  }
+
+  getSiguienteLabel(estado?: EstadoPedido): string {
+    const labels: Partial<Record<EstadoPedido, string>> = {
+      'PENDIENTE': 'Confirmar',
+      'CONFIRMADO': 'Preparar'
+    };
+    return estado ? (labels[estado] ?? '') : '';
+  }
+
+  puedeAvanzar(estado?: EstadoPedido): boolean {
+    return estado === 'PENDIENTE' || estado === 'CONFIRMADO';
+  }
+
+  puedeCancelar(estado?: EstadoPedido): boolean {
+    return !!estado && estado !== 'ENTREGADO' && estado !== 'CANCELADO';
+  }
+
+  getBadgeClass(estado?: EstadoPedido): string {
+    const clases: Partial<Record<EstadoPedido, string>> = {
+      'PENDIENTE': 'badge-warning',
+      'CONFIRMADO': 'badge-info',
+      'EN_PREPARACION': 'badge-orange',
+      'ENVIADO': 'badge-purple',
+      'ENTREGADO': 'badge-success',
+      'CANCELADO': 'badge-danger'
+    };
+    return estado ? (clases[estado] ?? '') : '';
   }
 
   private resetFormulario(): void {
-    this.nuevo = { descripcion: '', cantidad: 0, precio: 0, inventarioId: 0 };
-    this.editando = false;
-    this.idEditando = null;
-  }
-
-  private mostrarModal(mensaje: string): void {
-    this.mensajeModal = mensaje;
-    this.modalVisible = true;
-  }
-
-  private cerrarModal(): void {
-    this.modalVisible = false;
+    this.nuevo = { clienteNombre: '', descripcion: '', cantidad: 1, inventarioId: 0 };
+    this.inventarioSeleccionado = null;
   }
 }

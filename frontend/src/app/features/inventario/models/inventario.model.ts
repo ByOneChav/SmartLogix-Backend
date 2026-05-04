@@ -4,4 +4,5 @@ export interface Inventario {
   ubicacion: string;
   stock: number;
   precio: number;
+  stockMinimo?: number;
 }

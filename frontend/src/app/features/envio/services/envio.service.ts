@@ -21,8 +21,8 @@ export class EnvioService {
     return this.http.post<Envio>(`${this.apiUrl}/create`, data);
   }
 
-  update(id: number, data: Envio): Observable<Envio> {
-    return this.http.put<Envio>(`${this.apiUrl}/update/${id}`, data);
+  cambiarEstado(id: number, estado: string): Observable<Envio> {
+    return this.http.put<Envio>(`${this.apiUrl}/update/${id}/estado?estado=${estado}`, {});
   }
 
   delete(id: number): Observable<void> {

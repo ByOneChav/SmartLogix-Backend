@@ -49,8 +49,22 @@ public class InventarioService {
         existente.setUbicacion(inventario.getUbicacion());
         existente.setStock(inventario.getStock());
         existente.setPrecio(inventario.getPrecio());
+        existente.setStockMinimo(inventario.getStockMinimo());
 
         return inventarioRepository.save(existente);
+    }
+
+    // Descontar stock — llamado por msvc-pedido via Feign
+    public Inventario descontarStock(Long id, Integer cantidad) {
+        Inventario inventario = findById(id);
+        if (inventario.getStock() < cantidad) {
+            throw new RuntimeException(
+                "Stock insuficiente para '" + inventario.getNombreProducto() +
+                "'. Disponible: " + inventario.getStock()
+            );
+        }
+        inventario.setStock(inventario.getStock() - cantidad);
+        return inventarioRepository.save(inventario);
     }
 
     // Eliminar inventario

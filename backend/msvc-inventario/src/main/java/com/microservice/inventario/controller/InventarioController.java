@@ -122,6 +122,25 @@ public class InventarioController {
     }
 
     /**
+     * DESCONTAR STOCK — Consumido por msvc-pedido via Feign
+     */
+    @PutMapping("/{id}/descontar-stock")
+    @Operation(summary = "Descontar stock", description = "Descuenta la cantidad indicada del stock. Llamado internamente por msvc-pedido via Feign al crear un pedido.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Stock descontado correctamente"),
+            @ApiResponse(responseCode = "400", description = "Stock insuficiente")
+    })
+    public ResponseEntity<?> descontarStock(
+            @PathVariable Long id,
+            @RequestParam Integer cantidad) {
+        try {
+            return ResponseEntity.ok(inventarioService.descontarStock(id, cantidad));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    /**
      * OBTENER PEDIDOS ASOCIADOS
      */
     @GetMapping("/pedido/{inventarioId}")
