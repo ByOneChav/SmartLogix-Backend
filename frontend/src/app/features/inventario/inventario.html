@@ -1,1 +1,75 @@
-<p>inventario works!</p>
+<!-- HEADER -->
+<div class="header">
+    <img src="https://cdn-icons-png.flaticon.com/512/3082/3082011.png">
+    <h1>Gestión de Inventario</h1>
+</div>
+
+<div class="container">
+
+    <!-- FORM -->
+    <div class="form-card">
+        <h2>{{ editando ? 'Actualizar Producto' : 'Registrar Inventario' }}</h2>
+
+        <form (ngSubmit)="guardar()">
+
+            <!-- NOMBRE -->
+            <input [(ngModel)]="nuevo.nombreProducto" name="nombreProducto" placeholder="Nombre del producto" required>
+
+            <!-- UBICACION -->
+            <input [(ngModel)]="nuevo.ubicacion" name="ubicacion" placeholder="Ubicación" required>
+
+            <!-- STOCK -->
+            <input [(ngModel)]="nuevo.stock" name="stock" type="number" placeholder="Stock" required>
+
+            <!-- PRECIO -->
+            <input [(ngModel)]="nuevo.precio" name="precio" type="number" placeholder="Precio" required>
+
+            <!-- BOTON -->
+            <button type="submit" class="btn-primary">
+                {{ editando ? 'Actualizar' : 'Guardar' }}
+            </button>
+
+        </form>
+    </div>
+
+    <!-- TABLA -->
+    <div class="table-card">
+        <h2>Lista de Inventario</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Producto</th>
+                    <th>Ubicación</th>
+                    <th>Stock</th>
+                    <th>Precio</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr *ngFor="let item of inventarios">
+                    <td>{{ item.id }}</td>
+                    <td>{{ item.nombreProducto }}</td>
+                    <td>{{ item.ubicacion }}</td>
+                    <td>{{ item.stock }}</td>
+                    <td>${{ item.precio }}</td>
+                    <td>
+                        <button class="btn-edit" (click)="editar(item)">Editar</button>
+                        <button class="btn-delete" (click)="eliminar(item.id!)">Eliminar</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- 🔥 MODAL PROFESIONAL -->
+<div class="modal" *ngIf="modalVisible">
+    <div class="modal-content">
+        <span class="spinner-modal"></span>
+        <p>{{ mensajeModal }}</p>
+    </div>
+</div>

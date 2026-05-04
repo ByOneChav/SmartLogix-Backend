@@ -1,5 +1,6 @@
 package com.microservice.gateway.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -13,6 +14,9 @@ import org.springframework.web.cors.reactive.CorsWebFilter;
 @Configuration
 public class CorsConfig {
 
+    @Value("${app.cors.allowed-origins}")
+    private String allowedOrigins;
+
     @Bean
     public CorsWebFilter corsWebFilter() {
 
@@ -20,13 +24,13 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         // 🔥 Permitir Swagger (puerto 8082)
-        config.addAllowedOrigin("http://localhost:8081");
-        config.addAllowedOrigin("http://localhost:8082");
-        config.addAllowedOrigin("http://localhost:8083");
-        config.addAllowedOrigin("http://localhost:8084");
-
+//        config.addAllowedOrigin("http://localhost:8081");
+//        config.addAllowedOrigin("http://localhost:8082");
+//        config.addAllowedOrigin("http://localhost:8083");
+//        config.addAllowedOrigin("http://localhost:8084");
+        config.addAllowedOrigin(allowedOrigins);
         // (opcional pero útil en desarrollo)
-        config.addAllowedOrigin("http://localhost:8080");
+//        config.addAllowedOrigin("http://localhost:8080");
 
         // Permitir todos los métodos HTTP
         config.addAllowedMethod("*");

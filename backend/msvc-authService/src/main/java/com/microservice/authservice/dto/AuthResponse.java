@@ -13,4 +13,5 @@ public class AuthResponse {
 
     @Schema(description = "Token JWT generado", example = "eyJhbGciOiJIUzI1Ni...")
     private String token;
+    private UserResponse user;
 }
